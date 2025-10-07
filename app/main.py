@@ -6,10 +6,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from .routes import auth, todos
 from .database import Base, engine
 
-app = FastAPI()
+app = FastAPI(
+    title="Todo API",
+    version="1.0.0",
+    docs_url="/docs",          # ← 明示的に指定
+    redoc_url="/redoc",        # ← 任意。/redoc も見れるように
+    openapi_url="/openapi.json"  # ← 明示的に指定（確認しやすい）
+)
 
-# DBテーブル作成
 Base.metadata.create_all(bind=engine)
+
 
 # CORS
 origins = [
@@ -20,8 +26,8 @@ origins = [
 ]
 
 app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,       # ← ここが正しい！
+    CORSMiddleware, 
+    allow_origins=origins,      
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,3 +37,7 @@ app.add_middleware(
 # ルーター登録
 app.include_router(auth.router)
 app.include_router(todos.router)
+
+@app.get("/")
+def root():
+    return {"status": "ok"}
